@@ -2,7 +2,6 @@
 
 for file in *.lva
 do
-  echo $file
   cp $file list_tmp
   sed -i 's/"/\n/g' list_tmp
   sed -i '/text\|@/!d' list_tmp
