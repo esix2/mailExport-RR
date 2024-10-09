@@ -1,0 +1,14 @@
+#! /bin/bash
+
+for file in *.lva
+do
+  echo $file
+  cp $file list_tmp
+  sed -i 's/"/\n/g' list_tmp
+  sed -i '/text\|@/!d' list_tmp
+  cat list_tmp >> mail_list.csv
+done
+  sed -i 's/.*/\L&/' mail_list.csv
+  sort -u  mail_list.csv > list_tmp
+  mv list_tmp mail_list.csv
+  rm list_tmp >/dev/null 2>&1
