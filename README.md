@@ -1,4 +1,4 @@
-# Install and use
+# Installation and usage
 * clone the repo
   * git clone https://github.com/esix2/mailExport-RR.git
   * cd mailExport-RR
