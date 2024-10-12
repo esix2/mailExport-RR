@@ -1,13 +1,42 @@
 #! /bin/bash
+gpgfile="mail_list.gpg"
+csvfile="mail_list.csv"
+
+if [ -f "$gpgfile" ]
+then
+  echo "Decrypting $gpgfile"
+  echo "Enter passphrase:"
+  read -s passphrase
+
+  # Try to decrypt the file using GPG with the provided passphrase
+  gpg --batch --yes --passphrase "$passphrase" -d "$gpgfile" > "$csvfile" 2>/dev/null
+
+  if [ $? -eq 0 ]; then
+      echo "Decryption successful. File saved as $csvfile."
+  else
+      echo "Error: Decryption failed. Incorrect passphrase."
+      exit 1
+  fi
+fi
 
 for file in *.lva
 do
   cp $file list_tmp
   sed -i 's/"/\n/g' list_tmp
   sed -i '/text\|@/!d' list_tmp
-  cat list_tmp >> mail_list.csv
+  cat list_tmp >> $csvfile
+#   cat "$csvfile" | wc -l
 done
-  sed -i 's/.*/\L&/' mail_list.csv
-  sort -u  mail_list.csv > list_tmp
-  mv list_tmp mail_list.csv
+  sed -i 's/.*/\L&/' $csvfile
+  sort -u  $csvfile > list_tmp
+  mv list_tmp $csvfile
   rm list_tmp >/dev/null 2>&1
+  echo " "
+  echo " "
+  echo "Encrypting $csvfile"
+  echo "Enter passphrase:"
+  read -s passphrase
+
+  # Try to decrypt the file using GPG with the provided passphrase
+  gpg --symmetric --batch --yes --passphrase "$passphrase" --output "$gpgfile" --cipher-algo AES256 "$csvfile"
+#   gpg --symmetric --output "$gpgfile" --cipher-algo AES256 "$csvfile"
