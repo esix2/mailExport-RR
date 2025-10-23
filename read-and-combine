@@ -1,7 +1,6 @@
 #! /bin/bash
 gpgfile="mail_list.gpg"
 csvfile="mail_list.csv"
-
 if [ -f "$gpgfile" ]
 then
   echo "Decrypting $gpgfile"
@@ -12,10 +11,10 @@ then
   gpg --batch --yes --passphrase "$passphrase" -d "$gpgfile" > "$csvfile" 2>/dev/null
 
   if [ $? -eq 0 ]; then
-      echo "Decryption successful. File saved as $csvfile."
+    echo "Decryption successful. File saved as $csvfile."
   else
-      echo "Error: Decryption failed. Incorrect passphrase."
-      exit 1
+    echo "Error: Decryption failed. Incorrect passphrase."
+    exit 1
   fi
 fi
 
@@ -25,18 +24,21 @@ do
   sed -i 's/"/\n/g' list_tmp
   sed -i '/text\|@/!d' list_tmp
   cat list_tmp >> $csvfile
-#   cat "$csvfile" | wc -l
+  #   cat "$csvfile" | wc -l
 done
-  sed -i 's/.*/\L&/' $csvfile
-  sort -u  $csvfile > list_tmp
-  mv list_tmp $csvfile
-  rm list_tmp >/dev/null 2>&1
-  echo " "
-  echo " "
-  echo "Encrypting $csvfile"
+sed -i 's/.*/\L&/' $csvfile
+sort -u  $csvfile > list_tmp
+mv list_tmp $csvfile
+rm list_tmp >/dev/null 2>&1
+echo " "
+echo " "
+echo "Encrypting $csvfile"
+if [[ "$newPass" == "y" ||  "$newPass" == "Y" || "$newPass" == "yes" ]]; then 
+  read -p "Do you want to change the passphrase? [y/N]:" newPass
   echo "Enter passphrase:"
   read -s passphrase
+fi
 
-  # Try to decrypt the file using GPG with the provided passphrase
-  gpg --symmetric --batch --yes --passphrase "$passphrase" --output "$gpgfile" --cipher-algo AES256 "$csvfile"
+# Try to decrypt the file using GPG with the provided passphrase
+gpg --symmetric --batch --yes --passphrase "$passphrase" --output "$gpgfile" --cipher-algo AES256 "$csvfile"
 #   gpg --symmetric --output "$gpgfile" --cipher-algo AES256 "$csvfile"
