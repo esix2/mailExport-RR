@@ -1,6 +1,19 @@
 #! /bin/bash
 gpgfile="mail_list.gpg"
 csvfile="mail_list.csv"
+
+if [ ! -f *.lva ]; then
+  echo "There is no lva files. You can only decrypte the existing list without updating."
+  read -p "Do you want to continue [y/N] (or abort)?:" onlyDecrypt
+  if [[ "$onlyDecrypt" == "y" || "$onlyDecrypt" == "Y" || "$onlyDecrypt" == "yes" ]]; then
+    clear
+    no_lva_file=true
+  else
+    exit 1
+  fi
+fi
+
+
 if [ -f "$gpgfile" ]
 then
   echo "Decrypting $gpgfile"
@@ -18,6 +31,10 @@ then
   fi
 fi
 
+if [ ! -f *.lva ]; then
+  exit 1
+fi
+
 for file in *.lva
 do
   cp $file list_tmp
@@ -32,13 +49,11 @@ mv list_tmp $csvfile
 rm list_tmp >/dev/null 2>&1
 echo " "
 echo " "
-echo "Encrypting $csvfile"
+echo "Encrypting the csv file into gpg"
+read -p "Do you want to change the passphrase? [y/N]:" newPass
 if [[ "$newPass" == "y" ||  "$newPass" == "Y" || "$newPass" == "yes" ]]; then 
-  read -p "Do you want to change the passphrase? [y/N]:" newPass
   echo "Enter passphrase:"
   read -s passphrase
 fi
 
-# Try to decrypt the file using GPG with the provided passphrase
 gpg --symmetric --batch --yes --passphrase "$passphrase" --output "$gpgfile" --cipher-algo AES256 "$csvfile"
-#   gpg --symmetric --output "$gpgfile" --cipher-algo AES256 "$csvfile"
